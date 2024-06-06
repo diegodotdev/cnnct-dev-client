@@ -1,21 +1,16 @@
 import { useUser } from "@clerk/clerk-react";
 import PostWizard from "../components/post-wizard";
-import useSWR from "swr";
 import { Loader } from "lucide-react";
-import axios from "axios";
 import Post from "../components/post";
-import type { TPost } from "../types";
-
-const fetcher = async (url: string): Promise<TPost[]> =>
-  await axios.get(url).then((res) => res.data);
+import { useQuery } from "@tanstack/react-query";
+import { getPosts } from "../lib/actions";
 
 export default function Home() {
   const { user } = useUser();
-  const { data, error, isLoading } = useSWR(
-    `${import.meta.env.VITE_API_BASE_URL}/posts`,
-    fetcher,
-    { refreshInterval: 1000 }
-  );
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["posts"],
+    queryFn: getPosts,
+  });
 
   return (
     <div className="w-full flex flex-col gap-5 justify-start items-center">

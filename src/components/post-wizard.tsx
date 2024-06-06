@@ -1,61 +1,55 @@
-import { z } from "zod";
-import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createPost } from "../lib/actions";
 import { useUser } from "@clerk/clerk-react";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../main";
+import axios from "axios";
+import { useState } from "react";
 
-const formSchema = z.object({
-  content: z
-    .string()
-    .max(300, { message: "Text must contain at most 300 character(s)" }),
-});
+type TBody = {
+  userName: string;
+  userAvatar: string;
+  userId: string;
+  content: string;
+};
 
 export default function PostWizard() {
   const { user } = useUser();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const [text, setText] = useState("");
+  const { mutate } = useMutation({
+    mutationFn: async () => {
+      const body: TBody = {
+        userId: user?.id as string,
+        userName: user?.firstName as string,
+        userAvatar: user?.imageUrl as string,
+        content: text,
+      };
+      return axios
+        .post(`${import.meta.env.VITE_API_BASE_URL}/posts/add-post`, body)
+        .then((res) => {
+          queryClient.invalidateQueries({ queryKey: ["posts"] });
+          return res.data;
+        })
+        .then(() => setText(""));
+    },
   });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const body = {
-      userId: user?.id as string,
-      userName: user?.firstName as string,
-      userAvatar: user?.imageUrl as string,
-      content: values.content,
-    };
-    await createPost(body);
-  };
   return (
-    <form
-      className="w-4/5 rounded-lg p-4 bg-gray-800"
-      onSubmit={form.handleSubmit(onSubmit)}
-    >
-      <Controller
-        name="content"
-        control={form.control}
-        render={({ field }) => (
-          <textarea
-            placeholder="What's on your mind?"
-            className="w-full outline-none resize-none h-[100px] bg-transparent text-gray-200"
-            {...field}
-          />
-        )}
+    <div className="w-full md:w-4/5 rounded-lg p-4 bg-gray-800 gap-4">
+      <textarea
+        placeholder="What's on your mind?"
+        className="w-full outline-none resize-none h-[100px] bg-transparent text-gray-200"
+        onChange={(e) => setText(e.target.value)}
+        value={text}
       />
-      <div className="h-10">
-        {form.formState.errors.content && (
-          <p className="text-sm text-red-400">
-            {form.formState.errors.content.message}
-          </p>
-        )}
-      </div>
       <div className="w-full flex justify-end items-center">
         <button
-          type="submit"
-          className="px-5 py-1 rounded-lg bg-green-400 text-white outline-none"
+          disabled={text.length === 0}
+          onClick={() => {
+            mutate();
+          }}
+          className="px-5 py-1 rounded-lg bg-green-400 text-white outline-none disabled:opacity-50"
         >
           Post
         </button>
       </div>
-    </form>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function Post(props: TPost) {
   return (
-    <Link to={`/${props.id}`} className="w-4/5">
+    <Link to={`/${props.id}`} className="w-full md:w-4/5">
       <div className="w-full p-4 bg-gray-800 rounded-lg flex flex-col gap-4">
         <div className="w-full flex justify-between items-center">
           <div className="flex items-center gap-2">

@@ -1,26 +1,19 @@
-import axios from "axios";
 import { useParams } from "react-router-dom";
-import useSWR from "swr";
-import type { TPost } from "../types";
 import { Loader } from "lucide-react";
 import moment from "moment";
 import Comment from "../components/comment";
 import CommentWizard from "../components/comment-wizard";
 import { useUser } from "@clerk/clerk-react";
-
-const fetcher = async (url: string): Promise<TPost> =>
-  await axios.get(url).then((res) => res.data);
+import { useQuery } from "@tanstack/react-query";
+import { getPost } from "../lib/actions";
 
 export default function Post() {
   const { user } = useUser();
   const { id } = useParams();
-  const { data, error, isLoading } = useSWR(
-    `${import.meta.env.VITE_API_BASE_URL}/posts/${id}`,
-    fetcher,
-    {
-      refreshInterval: 1000,
-    }
-  );
+  const { data, error, isLoading } = useQuery({
+    queryKey: ["post"],
+    queryFn: () => getPost(id as string),
+  });
 
   return (
     <div className="w-full flex flex-col gap-5 justify-start items-center">
@@ -39,7 +32,7 @@ export default function Post() {
       )}
       {data && (
         <>
-          <div className="w-4/5 p-4 bg-gray-800 rounded-lg flex flex-col gap-4">
+          <div className="w-full md:w-4/5 p-4 bg-gray-800 rounded-lg flex flex-col gap-4">
             <div className="w-full flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <img

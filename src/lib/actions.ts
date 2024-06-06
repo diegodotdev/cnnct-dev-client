@@ -1,30 +1,25 @@
 import axios from "axios";
+import { TPost } from "../types";
 
-export const createPost = async (body: {
-  userName: string;
-  userAvatar: string;
-  userId: string;
-  content: string;
-}) => {
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+export const getPosts = async () => {
   try {
-    await axios.post(`${import.meta.env.VITE_API_BASE_URL}/add-post`, body);
+    const { data }: { data: Promise<TPost[]> } = await axios.get(
+      `${BASE_URL}/posts`
+    );
+    return data;
   } catch (error) {
     console.log(error);
   }
 };
 
-export const createComment = async (body: {
-  postId: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  content: string;
-}) => {
+export const getPost = async (id: string) => {
   try {
-    await axios.post(
-      `${import.meta.env.VITE_API_BASE_URL}/posts/add-comment`,
-      body
+    const { data }: { data: Promise<TPost> } = await axios.get(
+      `${BASE_URL}/posts/${id}`
     );
+    return data;
   } catch (error) {
     console.log(error);
   }
