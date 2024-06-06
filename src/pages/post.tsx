@@ -15,7 +15,7 @@ export default function Post() {
   const { user } = useUser();
   const { id } = useParams();
   const { data, error, isLoading } = useSWR(
-    `http://localhost:9090/posts/${id}`,
+    `${import.meta.env.VITE_API_BASE_URL}/posts/${id}`,
     fetcher,
     {
       refreshInterval: 1000,

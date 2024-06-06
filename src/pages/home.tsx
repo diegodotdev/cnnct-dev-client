@@ -12,7 +12,7 @@ const fetcher = async (url: string): Promise<TPost[]> =>
 export default function Home() {
   const { user } = useUser();
   const { data, error, isLoading } = useSWR(
-    "http://localhost:9090/posts",
+    `${import.meta.env.VITE_API_BASE_URL}/posts`,
     fetcher,
     { refreshInterval: 1000 }
   );

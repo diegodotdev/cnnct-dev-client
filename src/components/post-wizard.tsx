@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createPost } from "../lib/actions";
+import { useUser } from "@clerk/clerk-react";
 
 const formSchema = z.object({
   content: z
@@ -9,12 +11,19 @@ const formSchema = z.object({
 });
 
 export default function PostWizard() {
+  const { user } = useUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    const body = {
+      userId: user?.id as string,
+      userName: user?.firstName as string,
+      userAvatar: user?.imageUrl as string,
+      content: values.content,
+    };
+    await createPost(body);
   };
   return (
     <form
